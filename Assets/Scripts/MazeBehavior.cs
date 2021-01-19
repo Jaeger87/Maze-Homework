@@ -23,7 +23,7 @@ public class MazeBehavior : MonoBehaviour
 
     void Start()
     {
-        if(SystemInfo.supportsGyroscope)
+        if (SystemInfo.supportsGyroscope)
         {
             Input.gyro.enabled = true;
             gyroAvailable = true;
@@ -38,49 +38,61 @@ public class MazeBehavior : MonoBehaviour
 
         if (Input.touchCount > 0)
         {
-            
+            float xRotation = 0;
+            float yRotation = 0;
+            for (int i =0; i < Input.touchCount; i++)
+            {
+                Vector2 positionTouch = Input.GetTouch(i).position;
 
+                xRotation += map(0, Screen.width, maxXRotation, -maxXRotation, positionTouch.x);
+                yRotation += map(0, Screen.height, maxYRotation, -maxYRotation, positionTouch.y);
+                
+            }
+            ApplyRotation(xRotation, yRotation);
         }
-
-        if (Input.acceleration.sqrMagnitude >= sqrShakeDetectionThreshold
-           && Time.unscaledTime >= timeSinceLastShake + MinShakeInterval)
+        else if (gyroAvailable)
         {
-            sphere.GetComponent<Rigidbody>().AddForce(new Vector3(0, 4.5f, 0), ForceMode.Impulse);
-            timeSinceLastShake = Time.unscaledTime;
-            print("zompato");
-        }
-    
-
-
-        if (gyroAvailable)
-        {
-
             float myGyroY = Mathf.Clamp(Input.gyro.attitude.x, -tolleranceGyro, tolleranceGyro);
             float myGyroX = Mathf.Clamp(Input.gyro.attitude.y, -tolleranceGyro, tolleranceGyro);
 
-            myGyroX = scale(-tolleranceGyro, tolleranceGyro, -maxXRotation, maxXRotation, myGyroX);
-            myGyroY = scale(-tolleranceGyro, tolleranceGyro, maxYRotation, -maxYRotation, myGyroY);
+            myGyroX = map(-tolleranceGyro, tolleranceGyro, -maxXRotation, maxXRotation, myGyroX);
+            myGyroY = map(-tolleranceGyro, tolleranceGyro, maxYRotation, -maxYRotation, myGyroY);
 
-
-            transform.Rotate(myGyroX - xCurrentRotation, 0, myGyroY - yCurrentRotation); 
-            xCurrentRotation = myGyroX;
-            yCurrentRotation = myGyroY;
-
-
-            transform.Rotate(0, 0 - transform.rotation.y, 0);
+            ApplyRotation(myGyroX, myGyroY);
 
         }
+
 
         else
         {
             //accellerometro
         }
 
-        
+
         //print(Input.acceleration.x);
 
 
+        if (Input.acceleration.sqrMagnitude >= sqrShakeDetectionThreshold
+            && Time.unscaledTime >= timeSinceLastShake + MinShakeInterval)
+        {
+            sphere.GetComponent<Rigidbody>().AddForce(new Vector3(0, 4.5f, 0), ForceMode.Impulse);
+            timeSinceLastShake = Time.unscaledTime;
+        }
+
     }
+
+
+    private void ApplyRotation(float xRotation, float yRotation)
+    {
+        transform.Rotate(xRotation - xCurrentRotation, 0, yRotation - yCurrentRotation);
+        xCurrentRotation = xRotation;
+        yCurrentRotation = yRotation;
+
+
+        transform.Rotate(0, 0 - transform.rotation.y, 0);
+    }
+
+
 
     private static Quaternion GyroToUnity(Quaternion q)
     {
@@ -88,7 +100,7 @@ public class MazeBehavior : MonoBehaviour
     }
 
 
-    private float scale(float OldMin, float OldMax, float NewMin, float NewMax, float OldValue)
+    private float map(float OldMin, float OldMax, float NewMin, float NewMax, float OldValue)
     {
 
         float OldRange = (OldMax - OldMin);
