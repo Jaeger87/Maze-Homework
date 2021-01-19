@@ -14,6 +14,13 @@ public class MazeBehavior : MonoBehaviour
     private float xCurrentRotation = 0;
     private float yCurrentRotation = 0;
 
+    private float ShakeDetectionThreshold = 3.6f;
+    private float MinShakeInterval = 1;
+
+    private float sqrShakeDetectionThreshold;
+    private float timeSinceLastShake;
+
+
     void Start()
     {
         if(SystemInfo.supportsGyroscope)
@@ -22,8 +29,7 @@ public class MazeBehavior : MonoBehaviour
             gyroAvailable = true;
         }
 
-        transform.Rotate(0, 0, -00.1f);
-
+        sqrShakeDetectionThreshold = Mathf.Pow(ShakeDetectionThreshold, 2);
     }
 
     // Update is called once per frame
@@ -32,14 +38,22 @@ public class MazeBehavior : MonoBehaviour
 
         if (Input.touchCount > 0)
         {
-            transform.Rotate(0.01f, 0, 0);
+            
 
         }
+
+        if (Input.acceleration.sqrMagnitude >= sqrShakeDetectionThreshold
+           && Time.unscaledTime >= timeSinceLastShake + MinShakeInterval)
+        {
+            sphere.GetComponent<Rigidbody>().AddForce(new Vector3(0, 4.5f, 0), ForceMode.Impulse);
+            timeSinceLastShake = Time.unscaledTime;
+            print("zompato");
+        }
+    
 
 
         if (gyroAvailable)
         {
-            //print(Input.gyro.attitude);
 
             float myGyroY = Mathf.Clamp(Input.gyro.attitude.x, -tolleranceGyro, tolleranceGyro);
             float myGyroX = Mathf.Clamp(Input.gyro.attitude.y, -tolleranceGyro, tolleranceGyro);
@@ -51,6 +65,15 @@ public class MazeBehavior : MonoBehaviour
             transform.Rotate(myGyroX - xCurrentRotation, 0, myGyroY - yCurrentRotation); 
             xCurrentRotation = myGyroX;
             yCurrentRotation = myGyroY;
+
+
+            transform.Rotate(0, 0 - transform.rotation.y, 0);
+
+        }
+
+        else
+        {
+            //accellerometro
         }
 
         
