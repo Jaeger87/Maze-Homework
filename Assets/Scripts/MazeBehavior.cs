@@ -7,7 +7,6 @@ public class MazeBehavior : MonoBehaviour
     // Start is called before the first frame update
 
     private bool gyroAvailable;
-    public GameObject sphere;
     private const float tolleranceGyro = 0.5f;
     private const float maxYRotation = 25f;
     private const float maxXRotation = 22f;
