@@ -40,9 +40,13 @@ public class MazeBehavior : MonoBehaviour
         {
             float xRotation = 0;
             float yRotation = 0;
-            for (int i =0; i < Input.touchCount; i++)
+            for (int i = 0; i < Input.touchCount; i++)
             {
                 Vector2 positionTouch = Input.GetTouch(i).position;
+
+                if (positionTouch.x < 20 || positionTouch.x > Screen.width - 20 ||
+                    positionTouch.y < 20 || positionTouch.y > Screen.height - 20)
+                    continue;
 
                 xRotation += map(0, Screen.width, maxXRotation, -maxXRotation, positionTouch.x);
                 yRotation += map(0, Screen.height, maxYRotation, -maxYRotation, positionTouch.y);
@@ -76,6 +80,7 @@ public class MazeBehavior : MonoBehaviour
             && Time.unscaledTime >= timeSinceLastShake + MinShakeInterval)
         {
             sphere.GetComponent<Rigidbody>().AddForce(new Vector3(0, 4.5f, 0), ForceMode.Impulse);
+            sphere.GetComponent<Rigidbody>().AddTorque(new Vector3(Random.Range(-2, 2), Random.Range(-2, 2), Random.Range(-2, 2)), ForceMode.Impulse);
             timeSinceLastShake = Time.unscaledTime;
         }
 
