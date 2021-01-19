@@ -63,7 +63,6 @@ public class MazeBehavior : MonoBehaviour
 
         else
         {
-
             float myAccY = Mathf.Clamp(Input.acceleration.y, -tolleranceGyro, tolleranceGyro);
             float myAccX = Mathf.Clamp(Input.acceleration.x, -tolleranceGyro, tolleranceGyro);
 
