@@ -14,11 +14,7 @@ public class MazeBehavior : MonoBehaviour
     private float xCurrentRotation = 0;
     private float yCurrentRotation = 0;
 
-    private float ShakeDetectionThreshold = 3.6f;
-    private float MinShakeInterval = 1;
 
-    private float sqrShakeDetectionThreshold;
-    private float timeSinceLastShake;
 
 
     void Start()
@@ -28,8 +24,6 @@ public class MazeBehavior : MonoBehaviour
             Input.gyro.enabled = true;
             gyroAvailable = true;
         }
-
-        sqrShakeDetectionThreshold = Mathf.Pow(ShakeDetectionThreshold, 2);
     }
 
     // Update is called once per frame
@@ -46,7 +40,7 @@ public class MazeBehavior : MonoBehaviour
 
                 if (positionTouch.x < 20 || positionTouch.x > Screen.width - 20 ||
                     positionTouch.y < 20 || positionTouch.y > Screen.height - 20)
-                    continue;
+                    continue; // senza questo rischi di toccare il touch involontariamente (i telefoni moderni hanno veramente poca scocca)
 
                 xRotation += map(0, Screen.width, maxXRotation, -maxXRotation, positionTouch.x);
                 yRotation += map(0, Screen.height, maxYRotation, -maxYRotation, positionTouch.y);
@@ -69,20 +63,17 @@ public class MazeBehavior : MonoBehaviour
 
         else
         {
-            //accellerometro
+
+            float myAccY = Mathf.Clamp(Input.acceleration.y, -tolleranceGyro, tolleranceGyro);
+            float myAccX = Mathf.Clamp(Input.acceleration.x, -tolleranceGyro, tolleranceGyro);
+
+            myAccX = map(-tolleranceGyro, tolleranceGyro, maxXRotation, -maxXRotation, myAccX);
+            myAccY = map(-tolleranceGyro, tolleranceGyro, maxYRotation, -maxYRotation, myAccY);
+
+            ApplyRotation(myAccX, myAccY);
         }
 
 
-        //print(Input.acceleration.x);
-
-
-        if (Input.acceleration.sqrMagnitude >= sqrShakeDetectionThreshold
-            && Time.unscaledTime >= timeSinceLastShake + MinShakeInterval)
-        {
-            sphere.GetComponent<Rigidbody>().AddForce(new Vector3(0, 4.5f, 0), ForceMode.Impulse);
-            sphere.GetComponent<Rigidbody>().AddTorque(new Vector3(Random.Range(-2, 2), Random.Range(-2, 2), Random.Range(-2, 2)), ForceMode.Impulse);
-            timeSinceLastShake = Time.unscaledTime;
-        }
 
     }
 
